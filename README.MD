@@ -1,8 +1,8 @@
-# 🏋️ Zona Fit Evolution - API Backend
+# Zona Fit Evolution - API Backend
 
 Este proyecto es el backend para la aplicación móvil **Zona Fit Evolution**, construido con **Python** y **Flask**. Sigue una arquitectura modular basada en Blueprints para gestionar clientes, membresías, pagos y autenticación.
 
-## 🚀 Guía de Instalación y Ejecución
+## Guía de Instalación y Ejecución
 
 Si eres nuevo en el proyecto o te acabas de clonar el repositorio, sigue estos pasos:
 
@@ -60,7 +60,7 @@ El servidor estará disponible en: `http://localhost:5050`
 
 ---
 
-## 🛠️ Estructura del Proyecto
+## Estructura del Proyecto
 - `app/`: Lógica principal.
   - `routes/`: Endpoints de la API (Auth, Clientes, Membresías, etc.).
   - `models.py`: Configuración de la conexión a la base de datos.
@@ -70,6 +70,6 @@ El servidor estará disponible en: `http://localhost:5050`
 
 ---
 
-## 💡 Notas adicionales
+## Notas adicionales
 - **Acceso desde Emulador Android**: Usa la IP `http://10.0.2.2:5050`.
 - **Acceso desde Celular Físico**: Asegúrate de estar en el mismo Wi-Fi y usa la IP de tu PC (ej: `http://192.168.0.x:5050`).
