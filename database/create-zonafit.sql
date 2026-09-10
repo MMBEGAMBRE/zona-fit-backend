@@ -59,6 +59,6 @@ CREATE TABLE IF NOT EXISTS registros (
 );
 
 -- Insertar usuario administrador por defecto (password: admin123)
--- Nota: En producción, la contraseña debe estar hasheada.
+-- Hash generado con change.py (bcrypt) para la contraseña "admin123".
 INSERT INTO cuentas (nombre, email, password, rol)
-VALUES ('Administrador', 'admin@zonafit.com', '$2b$12$K7bQ6.3t/U1zX2zX2zX2zOuY8zX2zX2zX2zX2zX2zX2zX2zX2zX2', 'ADMINISTRADOR');
+VALUES ('Administrador', 'admin@zonafit.com', '$2b$12$dx1zf4ttgyYrIJILNUnkaeB9V8gBPR1g764O2htTxL/P/YAvVNj26', 'ADMINISTRADOR');
