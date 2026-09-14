@@ -263,3 +263,28 @@ def delete_cliente(id):
         return jsonify({"message": str(e)}), 500
     finally:
         close_connection(conn, cursor)
+
+@cliente_bp.route('/buscar/<string:documento>', methods=['GET'])
+@token_required
+def buscar_cliente_por_documento(documento):
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({"message": "Error de conexión a la base de datos"}), 500
+    cursor = conn.cursor(dictionary=True)
+    try:
+        # Buscamos al cliente y el estado de su membresía más reciente
+        cursor.execute("""
+            SELECT c.*, m.estado as membresia_estado, m.fecha_vencimiento, m.id as membresia_id
+            FROM clientes c
+            LEFT JOIN membresias m ON c.id = m.cliente_id
+            WHERE c.documento = %s
+            ORDER BY m.id DESC LIMIT 1
+        """, (documento,))
+        cliente = cursor.fetchone()
+        if cliente:
+            return jsonify(cliente), 200
+        return jsonify({"message": "Socio no encontrado"}), 404
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+    finally:
+        close_connection(conn, cursor)
