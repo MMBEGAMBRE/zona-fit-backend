@@ -98,3 +98,47 @@ def register_staff():
         return jsonify({"message": str(e)}), 500
     finally:
         close_connection(conn, cursor)
+
+@auth_bp.route('/users', methods=['GET'])
+@token_required
+@admin_required
+def get_users():
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({"message": "Error de conexión a la base de datos"}), 500
+    cursor = conn.cursor(dictionary=True)
+    try:
+        cursor.execute("SELECT id, nombre, email, rol FROM cuentas")
+        users = cursor.fetchall()
+        return jsonify(users), 200
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+    finally:
+        close_connection(conn, cursor)
+
+@auth_bp.route('/users/<int:id>', methods=['DELETE'])
+@token_required
+@admin_required
+def delete_user(id):
+    if g.user_id == id:
+        return jsonify({"message": "No puedes eliminar tu propia cuenta"}), 400
+
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({"message": "Error de conexión a la base de datos"}), 500
+    cursor = conn.cursor()
+    try:
+        cursor.execute("SELECT nombre FROM cuentas WHERE id = %s", (id,))
+        user = cursor.fetchone()
+        if not user:
+            return jsonify({"message": "Usuario no encontrado"}), 404
+
+        cursor.execute("DELETE FROM cuentas WHERE id = %s", (id,))
+        conn.commit()
+        registrar(g.user_id, 'USUARIO_ELIMINADO', f"Eliminó la cuenta de {user[0]} (id {id})")
+        return jsonify({"message": "Usuario eliminado"}), 200
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"message": str(e)}), 500
+    finally:
+        close_connection(conn, cursor)

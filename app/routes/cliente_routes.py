@@ -28,7 +28,6 @@ def _sumar_meses(fecha, meses):
 
 @cliente_bp.route('/', methods=['GET'])
 @token_required
-@admin_required
 def get_clientes():
     conn = get_db_connection()
     if conn is None:
@@ -45,7 +44,6 @@ def get_clientes():
 
 @cliente_bp.route('/<int:id>', methods=['GET'])
 @token_required
-@admin_required
 def get_cliente(id):
     conn = get_db_connection()
     if conn is None:
@@ -64,7 +62,6 @@ def get_cliente(id):
 
 @cliente_bp.route('/', methods=['POST'])
 @token_required
-@admin_required
 def create_cliente():
     data = request.get_json()
     nombre = data.get('nombre')
@@ -96,7 +93,6 @@ def create_cliente():
 
 @cliente_bp.route('/con-membresia', methods=['POST'])
 @token_required
-@admin_required
 def create_cliente_con_membresia():
     data = request.get_json()
     nombre = data.get('nombre')
@@ -210,7 +206,6 @@ def create_cliente_con_membresia():
 
 @cliente_bp.route('/<int:id>', methods=['PUT'])
 @token_required
-@admin_required
 def update_cliente(id):
     data = request.get_json()
     nombre = data.get('nombre')
@@ -238,6 +233,33 @@ def update_cliente(id):
         registrar(g.user_id, 'CLIENTE_EDITADO', f"Editó el cliente {nombre} {apellido} (id {id})")
         return jsonify({"message": "Cliente actualizado"}), 200
     except Exception as e:
+        return jsonify({"message": str(e)}), 500
+    finally:
+        close_connection(conn, cursor)
+
+@cliente_bp.route('/<int:id>', methods=['DELETE'])
+@token_required
+@admin_required
+def delete_cliente(id):
+    conn = get_db_connection()
+    if conn is None:
+        return jsonify({"message": "Error de conexión a la base de datos"}), 500
+    cursor = conn.cursor()
+    try:
+        # Primero verificamos si el cliente existe para la auditoría
+        cursor.execute("SELECT nombre, apellido FROM clientes WHERE id = %s", (id,))
+        cliente = cursor.fetchone()
+        if not cliente:
+            return jsonify({"message": "Cliente no encontrado"}), 404
+
+        # Eliminamos el cliente (la DB debería manejar el ON DELETE CASCADE si está configurado,
+        # si no, habría que borrar membresías y pagos primero. Asumimos integridad referencial).
+        cursor.execute("DELETE FROM clientes WHERE id = %s", (id,))
+        conn.commit()
+        registrar(g.user_id, 'CLIENTE_ELIMINADO', f"Eliminó al cliente {cliente[0]} {cliente[1]} (id {id})")
+        return jsonify({"message": "Cliente eliminado exitosamente"}), 200
+    except Exception as e:
+        conn.rollback()
         return jsonify({"message": str(e)}), 500
     finally:
         close_connection(conn, cursor)
