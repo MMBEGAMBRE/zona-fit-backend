@@ -34,7 +34,16 @@ def get_clientes():
         return jsonify({"message": "Error de conexión a la base de datos"}), 500
     cursor = conn.cursor(dictionary=True)
     try:
-        cursor.execute("SELECT * FROM clientes")
+        # Traemos clientes con el estado de su membresía más reciente
+        cursor.execute("""
+            SELECT c.*, m.estado as membresia_estado, m.fecha_vencimiento
+            FROM clientes c
+            LEFT JOIN (
+                SELECT cliente_id, estado, fecha_vencimiento
+                FROM membresias
+                WHERE id IN (SELECT MAX(id) FROM membresias GROUP BY cliente_id)
+            ) m ON c.id = m.cliente_id
+        """)
         clientes = cursor.fetchall()
         return jsonify(clientes), 200
     except Exception as e:

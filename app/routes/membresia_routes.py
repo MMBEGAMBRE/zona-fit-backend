@@ -29,7 +29,7 @@ def get_membresias():
     cursor = conn.cursor(dictionary=True)
     try:
         cursor.execute("""
-            SELECT m.*, c.nombre as cliente_nombre, c.apellido as cliente_apellido
+            SELECT m.*, c.nombre as cliente_nombre, c.apellido as cliente_apellido, c.documento as cliente_documento
             FROM membresias m
             JOIN clientes c ON m.cliente_id = c.id
         """)
